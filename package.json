@@ -1,0 +1,14 @@
+{
+  "name": "zweb",
+  "version": "1.0.6",
+  "description": "用于创建web项目的命令行工具。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "zweb": "./bin/index.js"
+  },
+  "author": "zhoufeng",
+  "license": "ISC"
+}
