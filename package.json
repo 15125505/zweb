@@ -1,6 +1,6 @@
 {
   "name": "zweb",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "用于创建web项目的命令行工具。",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,7 @@
   "bin": {
     "zweb": "./bin/index.js"
   },
-  "author": "zhoufeng",
-  "license": "ISC"
+  "files":["package.json","bin"],
+  "license": "ISC",
+  "author": "zhoufeng"
 }

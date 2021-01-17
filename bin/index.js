@@ -11,9 +11,6 @@ function main() {
         return ;
     }
 
-    console.log(process.cwd(), process.argv);
-
-
     // 创建目录
     let name = process.argv[2];
     let folderName = path.join(process.cwd(), name);
