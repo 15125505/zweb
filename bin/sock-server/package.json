@@ -1,0 +1,24 @@
+{
+  "devDependencies": {
+    "@webpack-cli/generators": "^3.0.7",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "version": "1.0.0",
+  "description": "基于Node.js的websocket服务器",
+  "name": "proj_name",
+  "scripts": {
+    "build": "webpack --mode=production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "build:prod": "webpack --mode=production --node-env=production",
+    "watch": "webpack --watch"
+  },
+  "dependencies": {
+    "@types/ws": "^8.5.5",
+    "crlog": "^1.0.7",
+    "mysql2": "^3.5.2",
+    "ws": "^8.13.0"
+  }
+}
