@@ -62,7 +62,6 @@ function main() {
 
 function zSockServer(srcFolder, dstFolder, name) {
     const files = [
-        '/.gitignore',
         '/ecosystem.config.js',
         '/package.json',
         '/README.md',
@@ -77,6 +76,7 @@ function zSockServer(srcFolder, dstFolder, name) {
         '/src/db/dbConfig.ts'
     ];
     files.forEach(value => zCopy(path.normalize(srcFolder + value), path.normalize(dstFolder + value), 'proj_name', name))
+    zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(dstFolder, '.gitignore'));
 }
 
 // 复制指定目录下的文件
