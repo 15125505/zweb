@@ -5,6 +5,9 @@ const path = require('path');
 
 function main() {
 
+    const packageJson = require('../package.json');
+    console.log('zweb版本：', packageJson.version);
+
     // 获取参数
     const params = [...process.argv];
     let isSock = false, isServer = false;
@@ -40,7 +43,7 @@ function main() {
     }
 
     // 写入文件
-    let srcFolder = path.parse(process.argv[1]).dir;
+    let srcFolder = __dirname
     if (isSock) {
         zSockServer(path.join(srcFolder, 'sock-server'), folderName, name);
         return;
