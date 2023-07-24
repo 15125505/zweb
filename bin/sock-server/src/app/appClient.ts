@@ -19,6 +19,16 @@ export class AppClient extends WsClient {
         return new AppClient(ws);
     }
 
+
+    /**
+     * 构造函数
+     * 正常情况下，本函数无需修改
+     */
+    private constructor(ws: WebSocket) {
+        super(ws);
+        this.init();
+    }
+
     /**
      * 处理收到的消息
      * 正常情况下，本函数无需修改
@@ -37,10 +47,9 @@ export class AppClient extends WsClient {
             }
 
             // 找到消息处理函数并调用
-            const fnName = 'on' + msg.name[0].toUpperCase() + msg.name.substring(1);
-            const fn = this[fnName];
+            const fn = this.msgFunc.get(msg.name);
             if (!fn) {
-                Log.error('未找到消息处理函数', fnName);
+                Log.error('未找到消息处理函数', msg.name);
                 return;
             }
             fn.bind(this)(msg.value);
@@ -83,10 +92,9 @@ export class AppClient extends WsClient {
     private static lastCheckId = 0;
 
     /**
-     * 为了保证能通过函数名调用函数，避免编译错误，需要进行如下定义
+     * 消息处理函数映射表
      */
-    [key: string]: any;
-
+    private msgFunc = new Map<string, (value: any) => any>();
 
     //////////////////////////////// 正常情况下，以下内容是需要根据自己业务需求进行调整的 ////////////////////////////////
 
@@ -100,6 +108,14 @@ export class AppClient extends WsClient {
      */
     isValid(): boolean {
         return !!this.userId;
+    }
+
+    /**
+     * 初始化消息处理函数
+     * 用户需要将自己的消息处理函数注册到msgFunc中
+     */
+    private init() {
+        this.msgFunc.set('login', this.onLogin);
     }
 
     /**

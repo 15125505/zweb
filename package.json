@@ -1,6 +1,6 @@
 {
   "name": "zweb",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "用于创建web项目的命令行工具。",
   "main": "index.js",
   "scripts": {
