@@ -48,6 +48,10 @@ function main() {
         zSockServer(path.join(srcFolder, 'sock-server'), folderName, name);
         return;
     }
+    if (isServer) {
+        zNodeServer(path.join(srcFolder, 'node-server'), folderName, name);
+        return;
+    }
 
     srcFolder = path.join(srcFolder, 'tpl');
     console.log('原始目录', srcFolder);
@@ -77,6 +81,23 @@ function zSockServer(srcFolder, dstFolder, name) {
         '/src/core/wsClients.ts',
         '/src/core/wsServer.ts',
         '/src/db/dbConfig.ts'
+    ];
+    files.forEach(value => zCopy(path.normalize(srcFolder + value), path.normalize(dstFolder + value), 'proj_name', name))
+    zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(dstFolder, '.gitignore'));
+}
+function zNodeServer(srcFolder, dstFolder, name) {
+    const files = [
+        '/ecosystem.config.js',
+        '/package.json',
+        '/README.md',
+        '/tsconfig.json',
+        '/webpack.config.js',
+        '/src/index.ts',
+        '/src/@types/net.d.ts',
+        '/src/app/example.ts',
+        '/src/conf/dbConfig.ts',
+        '/src/core/httpServer.ts',
+        '/src/core/process.ts',
     ];
     files.forEach(value => zCopy(path.normalize(srcFolder + value), path.normalize(dstFolder + value), 'proj_name', name))
     zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(dstFolder, '.gitignore'));
