@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "node-ssh": "^13.1.0",
     "@types/ws": "^8.5.5",
     "@webpack-cli/generators": "^3.0.7",
     "ts-loader": "^9.4.4",
@@ -14,7 +15,8 @@
     "build": "webpack --mode=production --node-env=production",
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "up": "ts-node upload.ts"
   },
   "dependencies": {
     "crlog": "^1.0.7",
