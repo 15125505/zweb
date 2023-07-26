@@ -9,18 +9,27 @@
 declare namespace net {
 
     /**
-     * 网络协议统一格式标准
+     * 输入消息统一格式
      */
-    interface Msg {
+    interface InMsg<T = any> {
         name: string;
-        value?: any;
+        value?: T;
+    }
+
+    /**
+     * 输出消息统一格式
+     */
+    interface OutMsg<T = any> {
+        name: string;
+        value?: T;
+        err?: string;   // 错误信息字段如果存在，则表示处理出错
     }
 }
 
 /**
  * 客户端 -> 服务器
  */
-declare namespace net.c {
+declare namespace netI{
 
     /**
      * 客户端登录
@@ -34,7 +43,7 @@ declare namespace net.c {
 /**
  * 服务器 -> 客户端
  */
-declare namespace net.s {
+declare namespace netO {
 
     /**
      * 客户端登录反馈

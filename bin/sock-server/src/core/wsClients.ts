@@ -24,8 +24,15 @@ export abstract class WsClient {
     /**
      * 发送消息到客户端
      */
-    send(name: string, value?: any) {
-        this.ws.send(JSON.stringify(value ? {name, value} : {name}));
+    send(name: string, value?: any, err?: string) {
+        const out: net.OutMsg = {name};
+        if (err) {
+            Log.error('消息处理失败：', err)
+            out.err = err;
+        } else if (value) {
+            out.value = value;
+        }
+        this.ws.send(JSON.stringify(out));
     }
 
     /**
@@ -34,9 +41,46 @@ export abstract class WsClient {
     abstract isValid(): boolean;
 
     /**
-     * 使用者必须实现该方法，用于处理收到的消息
+     * 处理收到的消息
+     * 正常情况下，本函数无需修改
      */
-    abstract onMessage(data: any): void;
+    onMessage(data: any): void {
+
+        Log.log('收到消息', data.toString(), '来自用户：', this.id);
+
+        // 解析并处理消息
+        try {
+            // 解析消息
+            const msg = JSON.parse(data) as net.InMsg;
+            if (!msg.name) {
+                Log.error('消息格式错误', msg);
+                return;
+            }
+
+            // 找到消息处理函数并调用
+            const fn = this.msgFunc.get(msg.name);
+            if (!fn) {
+                Log.error('未找到消息处理函数', msg.name);
+                return;
+            }
+            fn(msg.value).then(ret => this.send(msg.name, ret)).catch(err => this.send(msg.name, undefined, err));
+        } catch (e) {
+            Log.error('消息处理失败', e)
+        }
+    }
+
+
+    /**
+     * 注册消息处理函数
+     */
+    protected registerMsg<I, O>(name: string, fn: (value: I) => Promise<O>) {
+        this.msgFunc.set(name, fn.bind(this));
+    }
+
+    /**
+     * 消息处理函数映射表
+     */
+    protected msgFunc = new Map<string, (value: any) => Promise<any>>();
 }
 
 

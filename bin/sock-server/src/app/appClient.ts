@@ -19,45 +19,37 @@ export class AppClient extends WsClient {
         return new AppClient(ws);
     }
 
-
     /**
-     * 构造函数
-     * 正常情况下，本函数无需修改
+     * 构造函数，需要注册的消息处理函数在此处注册
      */
-    private constructor(ws: WebSocket) {
+    constructor(ws: WebSocket) {
         super(ws);
-        this.init();
+        this.registerMsg<netI.Login, netO.Login>('login', this.onLogin);
     }
 
     /**
-     * 处理收到的消息
-     * 正常情况下，本函数无需修改
+     * 登录消息处理函数
+     * 本函数是一个示例，使用者可以根据自己的需要进行修改
      */
-    onMessage(data: any): void {
+    private async onLogin(value: netI.Login): Promise<netO.Login> {
 
-        Log.log('收到消息', data.toString(), '来自用户：', this.id);
+        // 根据自己的业务需求，此处需要根据登录的信息获得用户ID，这里使用了一个简单的做法
+        this.userId = parseInt(value.code);
+        Log.warn('用户', this.userId, '登录成功');
 
-        // 解析并处理消息
-        try {
-            // 解析消息
-            const msg = JSON.parse(data);
-            if (!msg.name) {
-                Log.error('消息格式错误', msg);
-                return;
+        // 通知客户端登录成功
+        const ret: netO.Login = {token: this.id};
+        this.send('login', ret);
+
+        // 将当前连接信息加入到数据库，这一步操作是为了实现账号互斥
+        gAppDb.addClient(this.id, this.userId).then(res => {
+            if (!AppClient.lastCheckId) {
+                AppClient.lastCheckId = res.insertId;
             }
+        });
 
-            // 找到消息处理函数并调用
-            const fn = this.msgFunc.get(msg.name);
-            if (!fn) {
-                Log.error('未找到消息处理函数', msg.name);
-                return;
-            }
-            fn.bind(this)(msg.value);
-        } catch (e) {
-            Log.error('消息处理失败', e)
-        }
+        return ret;
     }
-
 
     /**
      * 进行账号互斥检查
@@ -91,12 +83,6 @@ export class AppClient extends WsClient {
      */
     private static lastCheckId = 0;
 
-    /**
-     * 消息处理函数映射表
-     */
-    private msgFunc = new Map<string, (value: any) => any>();
-
-    //////////////////////////////// 正常情况下，以下内容是需要根据自己业务需求进行调整的 ////////////////////////////////
 
     /**
      * 本连接对应的用户ID
@@ -110,33 +96,5 @@ export class AppClient extends WsClient {
         return !!this.userId;
     }
 
-    /**
-     * 初始化消息处理函数
-     * 用户需要将自己的消息处理函数注册到msgFunc中
-     */
-    private init() {
-        this.msgFunc.set('login', this.onLogin);
-    }
 
-    /**
-     * 登录消息处理函数
-     * 本函数是一个示例，使用者可以根据自己的需要进行修改
-     */
-    private onLogin(value: net.c.Login) {
-
-        // 根据自己的业务需求，此处需要根据登录的信息获得用户ID，这里使用了一个简单的做法
-        this.userId = parseInt(value.code);
-        Log.warn('用户', this.userId, '登录成功');
-
-        // 通知客户端登录成功
-        const ret: net.s.Login = {token: this.id};
-        this.send('login', ret);
-
-        // 将当前连接信息加入到数据库，这一步操作是为了实现账号互斥
-        gAppDb.addClient(this.id, this.userId).then(res => {
-            if (!AppClient.lastCheckId) {
-                AppClient.lastCheckId = res.insertId;
-            }
-        });
-    }
 }
