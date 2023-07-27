@@ -19,7 +19,7 @@
     "up": "ts-node upload.ts"
   },
   "dependencies": {
-    "crlog": "^1.0.7",
+    "crlog": "^1.0.8",
     "mysql2": "^3.5.2",
     "ws": "^8.13.0"
   }
