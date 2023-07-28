@@ -32,6 +32,12 @@ class WsServer {
         // WebSocketServer 对象监听 connection 事件，当有 WebSocket 连接请求时触发
         wss.on('connection', this.onConnection.bind(this));
 
+        // 普通请求返回 404
+        server.on('request', (req, res) => {
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end('404...');
+        });
+
         // http Server 对象监听 upgrade 事件，当有 WebSocket 连接请求时触发
         const onUpgrade = (ws: WebSocket) => wss.emit('connection', pfnGenClient(ws));
         server.on('upgrade', (request, socket, head) => {
