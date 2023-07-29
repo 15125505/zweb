@@ -10,7 +10,7 @@ function main() {
 
     // 获取参数
     const params = [...process.argv];
-    let isSock = false, isServer = false;
+    let isSock = false, isServer = false, isWeb = false;
     let index = params.indexOf('-sock');
     if (index >= 0) {
         params.splice(index, 1);
@@ -21,13 +21,21 @@ function main() {
         params.splice(index, 1);
         isServer = true;
     }
+    index = params.indexOf('-web');
+    if (index >= 0) {
+        params.splice(index, 1);
+        isWeb = true;
+    }
+
+    const usage = () => console.log(`zweb命令语法（abc为你想要创建的项目名称）：
+        zweb abc -web       # 创建普通的web项目
+        zweb abc -sock      # 创建node.js的websocket服务器
+        zweb abc -server    # 创建node.js的web服务器`);
+
 
     // 如果参数个数不为3个，那么提示使用方法
     if (params.length !== 3) {
-        console.log(`zweb命令语法（abc为你想要创建的项目名称）：
-        zweb abc            # 创建普通的web项目
-        zweb abc -sock      # 创建node.js的聊天服务器
-        zweb abc -server    # 创建node.js的web服务器`);
+        usage();
         return;
     }
 
@@ -52,19 +60,13 @@ function main() {
         zNodeServer(path.join(srcFolder, 'node-server'), folderName, name);
         return;
     }
+    if (isWeb) {
+        zWeb(path.join(srcFolder, 'web'), folderName, name);
+        return;
+    }
 
-    srcFolder = path.join(srcFolder, 'tpl');
-    console.log('原始目录', srcFolder);
-
-    zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(folderName, '.gitignore'));
-    zCopy(path.join(srcFolder, 'package.tpl'), path.join(folderName, 'package.json'), 'proj_name', name);
-    zCopy(path.join(srcFolder, 'README.md'), path.join(folderName, 'README.md'));
-    zCopy(path.join(srcFolder, 'webpack.common.js'), path.join(folderName, 'webpack.common.js'));
-    zCopy(path.join(srcFolder, 'webpack.dev.js'), path.join(folderName, 'webpack.dev.js'));
-    zCopy(path.join(srcFolder, 'webpack.prod.js'), path.join(folderName, 'webpack.prod.js'));
-    zCopy(path.join(srcFolder, 'src', 'index.html'), path.join(folderName, 'src', 'index.html'));
-    zCopy(path.join(srcFolder, 'src', 'index.js'), path.join(folderName, 'src', 'index.js'));
-    zCopy(path.join(srcFolder, 'src', 'style.css'), path.join(folderName, 'src', 'style.css'));
+    console.log('项目创建失败：未指定项目类型！');
+    usage();
 }
 
 function zSockServer(srcFolder, dstFolder, name) {
@@ -86,6 +88,7 @@ function zSockServer(srcFolder, dstFolder, name) {
     files.forEach(value => zCopy(path.normalize(srcFolder + value), path.normalize(dstFolder + value), 'proj_name', name))
     zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(dstFolder, '.gitignore'));
 }
+
 function zNodeServer(srcFolder, dstFolder, name) {
     const files = [
         '/ecosystem.config.js',
@@ -100,6 +103,22 @@ function zNodeServer(srcFolder, dstFolder, name) {
         '/src/conf/dbConfig.ts',
         '/src/core/httpServer.ts',
         '/src/core/process.ts',
+    ];
+    files.forEach(value => zCopy(path.normalize(srcFolder + value), path.normalize(dstFolder + value), 'proj_name', name))
+    zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(dstFolder, '.gitignore'));
+}
+
+function zWeb(srcFolder, dstFolder, name) {
+    const files = [
+        '/index.html',
+        '/package.json',
+        '/postcss.config.js',
+        '/README.md',
+        '/tsconfig.json',
+        '/upload.ts',
+        '/webpack.config.js',
+        '/src/index.ts',
+        '/src/style.css',
     ];
     files.forEach(value => zCopy(path.normalize(srcFolder + value), path.normalize(dstFolder + value), 'proj_name', name))
     zCopy(path.join(srcFolder, 'gitignore.tpl'), path.join(dstFolder, '.gitignore'));
