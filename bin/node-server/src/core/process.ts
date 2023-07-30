@@ -1,6 +1,4 @@
 // Description: 处理器基类
-/// <reference path="../@types/net.d.ts" />
-
 
 export abstract class Process {
     /**

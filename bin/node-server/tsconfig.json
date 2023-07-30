@@ -6,6 +6,9 @@
     "target": "es6",
     "allowJs": true
   },
+  "ts-node": {
+    "files": true
+  },
   "include": [
     "src/**/*.ts"
   ]

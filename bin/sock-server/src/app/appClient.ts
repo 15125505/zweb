@@ -1,4 +1,3 @@
-/// <reference path="../@types/net.d.ts" />
 // Description: 本文件是一个从WsClient派生自己的客户端类的示例
 // 例子中进行了一次登录操作，登录成功后，服务器会返回一个token
 // 如果同一个用户多次登录，后面的登录会将前面的登录踢下线
