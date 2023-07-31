@@ -111,7 +111,7 @@ class WsClients {
 
     addClient(client: WsClient) {
         this.clients.add(client);
-        this.showLog && Log.info('新连接加入：', client.id, '当前连接数：', this.clients.size)
+        this.showLog && Log.info('新连接加入：', client.ip, client.id, '当前连接数：', this.clients.size);
     }
 
     removeClient(client: WsClient, reason = 'unknown') {
