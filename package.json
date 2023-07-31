@@ -1,7 +1,7 @@
 {
   "name": "zweb",
-  "version": "1.2.2",
-  "description": "用于创建web项目的命令行工具。",
+  "version": "1.2.3",
+  "description": "用于创建ts项目的命令行工具。",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

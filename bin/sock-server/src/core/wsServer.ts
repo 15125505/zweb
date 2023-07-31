@@ -17,7 +17,7 @@ class WsServer {
      * @param pfnGenClient  用于生成客户端对象的函数
      * @param url   接受websocket请求的url
      */
-    init(port: number, pfnGenClient: (ws: WebSocket) => WsClient, url: string = '/ws') {
+    init(port: number, pfnGenClient: (ws: WebSocket, ip: string) => WsClient, url: string = '/ws') {
         if (this.server) {
             Log.error('不允许创建多个 WebSocket 服务');
             return;
@@ -36,10 +36,10 @@ class WsServer {
         server.on('request', (req, res) => {
             res.writeHead(404, {'Content-Type': 'text/plain'});
             res.end('404...');
+            Log.warn('收到非法http请求：', req.url);
         });
 
         // http Server 对象监听 upgrade 事件，当有 WebSocket 连接请求时触发
-        const onUpgrade = (ws: WebSocket) => wss.emit('connection', pfnGenClient(ws));
         server.on('upgrade', (request, socket, head) => {
 
             // 如果请求的 url 不是指定的 url，则返回 401 未授权错误
@@ -49,8 +49,17 @@ class WsServer {
                 return;
             }
 
+            // 获取客户端的 ip 地址
+            const ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || '';
+            let ipAddr = '';
+            if (Array.isArray(ip)) {
+                ipAddr = ip[0];
+            } else {
+                ipAddr = ip;
+            }
+
             // WebSocketServer 对象通过 handleUpgrade 函数将 socket 对象升级成 WebSocket 对象
-            wss.handleUpgrade(request, socket, head, onUpgrade);
+            wss.handleUpgrade(request, socket, head, ws => wss.emit('connection', pfnGenClient(ws, ipAddr)));
         });
 
         // http Server 对象开始监听端口
@@ -72,7 +81,7 @@ class WsServer {
         });
 
         // 监听 message 事件，当收到消息时输出到控制台
-        client.ws.on('message', (data: any) => {
+        client.ws.on('message', (data: Buffer) => {
             client.onMessage(data);
         });
 

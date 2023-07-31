@@ -29,13 +29,13 @@ declare namespace net {
 /**
  * 客户端 -> 服务器
  */
-declare namespace netI{
+declare namespace netI {
 
     /**
      * 客户端登录
      */
-    interface Login {
-        code: string;       // 登录码
+    interface ComeIn {
+        token: string;       // 登录码
     }
 
 }
@@ -48,8 +48,9 @@ declare namespace netO {
     /**
      * 客户端登录反馈
      */
-    interface Login {
-        token?: string;     // 登录成功后，服务器返回的token
-        reason?: string;    // 登录失败时，服务器返回的原因
+    interface ComeIn {
+        id: string;         // 客户端id
+        userId: number;      // 用户id
     }
+
 }

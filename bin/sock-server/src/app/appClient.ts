@@ -14,40 +14,37 @@ export class AppClient extends WsClient {
      * 用于创建客户端对象的函数
      * 正常情况下，本函数无需修改
      */
-    static newClient(ws: WebSocket): AppClient {
-        return new AppClient(ws);
+    static newClient(ws: WebSocket, ip: string): AppClient {
+        return new AppClient(ws, ip);
     }
 
     /**
      * 构造函数，需要注册的消息处理函数在此处注册
      */
-    constructor(ws: WebSocket) {
-        super(ws);
-        this.registerMsg<netI.Login, netO.Login>('login', this.onLogin);
+    constructor(ws: WebSocket, ip: string) {
+        super(ws, ip);
+        this.registerMsg<netI.ComeIn, netO.ComeIn>('comeIn', this.onComeIn);
+        this.encrypt = true;
     }
 
     /**
      * 登录消息处理函数
      * 本函数是一个示例，使用者可以根据自己的需要进行修改
      */
-    private async onLogin(value: netI.Login): Promise<netO.Login> {
+    private async onComeIn(value: netI.ComeIn): Promise<netO.ComeIn> {
 
-        // 根据自己的业务需求，此处需要根据登录的信息获得用户ID，这里使用了一个简单的做法
-        this.userId = parseInt(value.code);
-        Log.warn('用户', this.userId, '登录成功');
-
-        // 通知客户端登录成功
-        const ret: netO.Login = {token: this.id};
-        this.send('login', ret);
+        // 从数据库查询用户ID
+        this.userId = await gAppDb.token2UserId(value.token);
+        Log.warn(this.ip, '用户', this.userId, '登录成功', gWsClients.clients.size);
 
         // 将当前连接信息加入到数据库，这一步操作是为了实现账号互斥
-        gAppDb.addClient(this.id, this.userId).then(res => {
+        this.userId && gAppDb.addClient(this.id, this.userId).then(res => {
             if (!AppClient.lastCheckId) {
                 AppClient.lastCheckId = res.insertId;
             }
         });
 
-        return ret;
+        return {userId: this.userId, id: this.id};
     }
 
     /**
@@ -89,10 +86,10 @@ export class AppClient extends WsClient {
     private userId: number;
 
     /**
-     * 已经成功登录的连接视为有效连接
+     * 是否有效连接将决定是否发送心跳
      */
     isValid(): boolean {
-        return !!this.userId;
+        return true;
     }
 
 

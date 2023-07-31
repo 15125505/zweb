@@ -13,26 +13,42 @@ export abstract class WsClient {
 
     readonly ws: WebSocket;
     readonly id: string;
+    readonly ip: string;
     isAlive: boolean;
+    encrypt: boolean;
 
-    protected constructor(ws: WebSocket) {
+    protected constructor(ws: WebSocket, ip: string) {
         this.ws = ws;
+        this.ip = ip;
         this.id = Date.now() + Math.random().toFixed(4);
         this.isAlive = true;
+        this.encrypt = false;
     }
 
     /**
      * 发送消息到客户端
      */
-    send(name: string, value?: any, err?: string) {
+    send(name: string, value?: any, err?: string | Error) {
         const out: net.OutMsg = {name};
         if (err) {
             Log.error('消息处理失败：', err)
-            out.err = err;
+            if (err instanceof Error) {
+                out.err = err.message;
+            } else {
+                out.err = err;
+            }
         } else if (value) {
             out.value = value;
         }
-        this.ws.send(JSON.stringify(out));
+        if (this.encrypt) {
+            const data = Buffer.from(JSON.stringify(out));
+            for (let i = 0; i < data.length; ++i) {
+                data[i] = data[i] ^ 0x47;
+            }
+            this.ws.send(data);
+        } else {
+            this.ws.send(JSON.stringify(out));
+        }
     }
 
     /**
@@ -44,14 +60,19 @@ export abstract class WsClient {
      * 处理收到的消息
      * 正常情况下，本函数无需修改
      */
-    onMessage(data: any): void {
+    onMessage(data: Buffer): void {
 
-        Log.log('收到消息', data.toString(), '来自用户：', this.id);
+        // 解密消息
+        if (this.encrypt) {
+            for (let i = 0; i < data.length; ++i) {
+                data[i] = data[i] ^ 0x47;
+            }
+        }
 
         // 解析并处理消息
         try {
             // 解析消息
-            const msg = JSON.parse(data) as net.InMsg;
+            const msg = JSON.parse(data.toString()) as net.InMsg;
             if (!msg.name) {
                 Log.error('消息格式错误', msg);
                 return;
@@ -65,7 +86,7 @@ export abstract class WsClient {
             }
             fn(msg.value).then(ret => this.send(msg.name, ret)).catch(err => this.send(msg.name, undefined, err));
         } catch (e) {
-            Log.error('消息处理失败', e)
+            Log.error('消息处理失败', e, "消息内容：", data.toString());
         }
     }
 

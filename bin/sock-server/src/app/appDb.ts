@@ -17,7 +17,7 @@ class AppDb {
             this.clearExpiredClients().catch(e => {
                 console.log('清理过期客户端连接失败', e);
             });
-        }, 60 * 1000);
+        }, 3600_000);
     }
 
     // 添加一个新的记录到客户端连接表
@@ -50,6 +50,13 @@ class AppDb {
         await gDb.pool.query(`delete from chat.client where create_time < DATE_SUB(NOW(), INTERVAL 10 MINUTE)`);
         await gDb.pool.query(`optimize table chat.client`);
         Log.warn('清理过期客户端连接耗时：', Date.now() - tm, 'ms');
+    }
+
+    /**
+     * 根据token获取用户ID
+     */
+    async token2UserId(token: string): Promise<number> {
+    	return parseInt(token);
     }
 }
 
