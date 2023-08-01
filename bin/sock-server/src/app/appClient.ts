@@ -42,7 +42,7 @@ export class AppClient extends WsClient {
             if (!AppClient.lastCheckId) {
                 AppClient.lastCheckId = res.insertId;
             }
-        });
+        }).catch(err => console.error('添加连接异常', err));
 
         return {userId: this.userId, id: this.id};
     }
