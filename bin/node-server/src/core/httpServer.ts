@@ -124,7 +124,7 @@ class HttpServer {
      * 显示请求信息
      */
     private showInfo(req: express.Request, statusCode: number, time: [number, number]) {
-        const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress;
+        const ip = req.headers['x-forwarded-for']?.toString() || req.headers['x-real-ip']?.toString() || req.socket.remoteAddress;
         let ua = req.headers['user-agent'];
         if (ua.length > 50) {
             ua = ua.substring(ua.length - 50);

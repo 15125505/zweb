@@ -36,7 +36,8 @@ class WsServer {
         server.on('request', (req, res) => {
             res.writeHead(404, {'Content-Type': 'text/plain'});
             res.end('404...');
-            Log.warn('收到非法http请求：', req.url);
+            const ip = req.headers['x-forwarded-for']?.toString() || req.headers['x-real-ip']?.toString() || req.socket.remoteAddress;
+            Log.warn('收到非法http请求：', req.url, '来自：', ip);
         });
 
         // http Server 对象监听 upgrade 事件，当有 WebSocket 连接请求时触发
@@ -50,16 +51,10 @@ class WsServer {
             }
 
             // 获取客户端的 ip 地址
-            const ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress || '';
-            let ipAddr = '';
-            if (Array.isArray(ip)) {
-                ipAddr = ip[0];
-            } else {
-                ipAddr = ip;
-            }
+            const ip = request.headers['x-forwarded-for']?.toString() || request.headers['x-real-ip']?.toString() || request.socket.remoteAddress;
 
             // WebSocketServer 对象通过 handleUpgrade 函数将 socket 对象升级成 WebSocket 对象
-            wss.handleUpgrade(request, socket, head, ws => wss.emit('connection', pfnGenClient(ws, ipAddr)));
+            wss.handleUpgrade(request, socket, head, ws => wss.emit('connection', pfnGenClient(ws, ip)));
         });
 
         // http Server 对象开始监听端口
