@@ -4,7 +4,8 @@
     "noImplicitAny": true,
     "module": "CommonJS",
     "target": "es6",
-    "allowJs": true
+    "allowJs": true,
+    "esModuleInterop": true
   },
   "ts-node": {
     "files": true
