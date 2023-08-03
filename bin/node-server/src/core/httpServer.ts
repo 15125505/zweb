@@ -1,9 +1,9 @@
 // Description: http服务器
 
-import * as express from 'express';
+import express from 'express';
 import Log from "crlog";
 import {Process} from "./process";
-const bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 
 class HttpServer {
 
