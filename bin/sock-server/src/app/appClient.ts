@@ -14,17 +14,17 @@ export class AppClient extends WsClient {
      * 用于创建客户端对象的函数
      * 正常情况下，本函数无需修改
      */
-    static newClient(ws: WebSocket, ip: string): AppClient {
-        return new AppClient(ws, ip);
+    static newClient(ws: WebSocket, ip: string, ua: string): AppClient {
+        return new AppClient(ws, ip, ua);
     }
 
     /**
      * 构造函数，需要注册的消息处理函数在此处注册
      */
-    constructor(ws: WebSocket, ip: string) {
-        super(ws, ip);
+    constructor(ws: WebSocket, ip: string, ua: string) {
+        super(ws, ip, ua);
         this.registerMsg<netI.ComeIn, netO.ComeIn>('comeIn', this.onComeIn);
-        this.encrypt = true;
+        this.encrypt = false;
     }
 
     /**

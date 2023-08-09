@@ -1,8 +1,8 @@
 {
   "devDependencies": {
-    "node-ssh": "^13.1.0",
     "@types/ws": "^8.5.5",
     "@webpack-cli/generators": "^3.0.7",
+    "node-ssh": "^13.1.0",
     "ts-loader": "^9.4.4",
     "typescript": "^5.1.6",
     "webpack": "^5.88.2",
@@ -19,8 +19,10 @@
     "up": "ts-node upload.ts"
   },
   "dependencies": {
+    "bufferutil": "^4.0.7",
     "crlog": "^1.0.8",
     "mysql2": "^3.5.2",
+    "utf-8-validate": "^6.0.3",
     "ws": "^8.13.0"
   }
 }

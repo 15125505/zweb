@@ -17,7 +17,7 @@ class WsServer {
      * @param pfnGenClient  用于生成客户端对象的函数
      * @param url   接受websocket请求的url
      */
-    init(port: number, pfnGenClient: (ws: WebSocket, ip: string) => WsClient, url: string = '/ws') {
+    init(port: number, pfnGenClient: (ws: WebSocket, ip: string, ua: string) => WsClient, url: string = '/ws') {
         if (this.server) {
             Log.error('不允许创建多个 WebSocket 服务');
             return;
@@ -54,7 +54,7 @@ class WsServer {
             const ip = request.headers['x-forwarded-for']?.toString() || request.headers['x-real-ip']?.toString() || request.socket.remoteAddress;
 
             // WebSocketServer 对象通过 handleUpgrade 函数将 socket 对象升级成 WebSocket 对象
-            wss.handleUpgrade(request, socket, head, ws => wss.emit('connection', pfnGenClient(ws, ip)));
+            wss.handleUpgrade(request, socket, head, ws => wss.emit('connection', pfnGenClient(ws, ip, request.headers['user-agent']?.toString() || '')));
         });
 
         // http Server 对象开始监听端口

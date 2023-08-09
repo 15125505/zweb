@@ -14,12 +14,14 @@ export abstract class WsClient {
     readonly ws: WebSocket;
     readonly id: string;
     readonly ip: string;
+    readonly ua: string;
     isAlive: boolean;
     encrypt: boolean;
 
-    protected constructor(ws: WebSocket, ip: string) {
+    protected constructor(ws: WebSocket, ip: string, ua: string) {
         this.ws = ws;
         this.ip = ip;
+        this.ua = ua;
         this.id = Date.now() + Math.random().toFixed(4);
         this.isAlive = true;
         this.encrypt = false;
@@ -62,6 +64,12 @@ export abstract class WsClient {
      */
     onMessage(data: Buffer): void {
 
+        // 对于空消息，直接忽略
+        if (!data || data.length === 0) {
+            Log.warn('收到空消息', this.ip, this.id, this.ua);
+            return;
+        }
+
         // 解密消息
         if (this.encrypt) {
             for (let i = 0; i < data.length; ++i) {
@@ -86,7 +94,13 @@ export abstract class WsClient {
             }
             fn(msg.value).then(ret => this.send(msg.name, ret)).catch(err => this.send(msg.name, undefined, err));
         } catch (e) {
-            Log.error('消息处理失败', e, "消息内容：", data.toString());
+            Log.error('消息处理失败', this.ip, "消息内容：", data.toString(), e);
+            if (this.encrypt) {
+                for (let i = 0; i < data.length; ++i) {
+                    data[i] = data[i] ^ 0x47;
+                }
+                Log.error('消息处理失败', this.ip, "原始消息：", data.toString(), e);
+            }
         }
     }
 
@@ -111,7 +125,7 @@ class WsClients {
 
     addClient(client: WsClient) {
         this.clients.add(client);
-        this.showLog && Log.info('新连接加入：', client.ip, client.id, '当前连接数：', this.clients.size);
+        this.showLog && Log.info('新连接加入：', client.ip, client.ua.length > 50 ? client.ua.substring(client.ua.length - 50) : client.ua, client.id, '当前连接数：', this.clients.size);
     }
 
     removeClient(client: WsClient, reason = 'unknown') {
