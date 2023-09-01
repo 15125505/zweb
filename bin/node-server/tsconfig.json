@@ -6,7 +6,7 @@
     "target": "es6",
     "allowJs": true,
     "esModuleInterop": true,
-    "noEmit": true
+    "noEmit": false
   },
   "ts-node": {
     "files": true
