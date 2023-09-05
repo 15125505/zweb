@@ -1,5 +1,14 @@
 import {gHttpServer} from "./core/httpServer";
 import {Example} from "./app/example";
+import Log from "crlog";
+
+// 处理未捕获的异常以及未处理的promise异常，注意，这个事情非常重要，否则一些第三方库的不合理使用可能会导致服务器崩溃
+process.on('uncaughtException', (err) => {
+    Log.error('未曾捕获的全局异常: ', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    Log.error('未曾捕获的Rejection:', promise, 'reason:', reason);
+});
 
 gHttpServer.init({
     port: parseInt(process.env.PORT ?? '5000'),
