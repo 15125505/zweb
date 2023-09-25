@@ -9,7 +9,7 @@
     "webpack-cli": "^5.1.4"
   },
   "version": "1.0.1",
-  "description": "基于wordpress的Node.js服务端项目",
+  "description": "基于express的Node.js服务端项目",
   "name": "proj_name",
   "scripts": {
     "build": "webpack --mode=production --node-env=production",
