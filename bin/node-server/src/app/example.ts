@@ -3,14 +3,23 @@
 
 import {Process} from "../core/process";
 import {gDb} from "../conf/dbConfig";
+import express from "express";
 
 
 // todo: 修改类名为你的类名
 export class Example extends Process {
 
     init(): void {
-        // todo: 添加自己的消息处理函数
+        // todo: 添加自己的http原生处理函数（需要自行处理数据收发）
+        this.commonFunc.set('/test', this.onTest);
+
+        // todo: 添加自己的消息处理函数（使用约定的消息传递方式）
         this.msgFunc.set('/login', this.onLogin);
+    }
+
+    // todo: 如果是需要自己原生处理http请求，那么使用这种方式
+    onTest(req: express.Request, res: express.Response) {
+        res.send('test');
     }
 
     // todo: 在这儿定义消息处理过程

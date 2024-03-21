@@ -67,7 +67,7 @@ class HttpServer {
 
         // 处理请求
         app.use((req, res, next) => {
-            this.process(req, res).catch(e => res.status(500).send(e));
+            this.process(req, res).catch(e => res.status(500).send(e?.message ?? e));
         });
 
         // 启动服务器
@@ -78,15 +78,21 @@ class HttpServer {
      * 处理请求
      */
     private async process(req: express.Request, res: express.Response) {
-        const data = this.decode(req.body);
-        Log.info('收到：', data);
+        const url = req.url.split('?')[0];
         for (const p of this.handles) {
-            const msg = await p.onReq(req.url, data);
-            if (msg) {
-                Log.info('返回：', msg);
-                res.send(this.encode(msg));
+            if (p.hasCommonFunc(url)) {
+                p.onHttpReq(url, req, res);
                 return;
             }
+            if (!p.hasMsgFunc(url)) {
+                continue;
+            }
+            const data = this.decode(req.body);
+            Log.info('收到：', data);
+            const msg = await p.onReq(req.url, data);
+            Log.info('返回：', msg);
+            res.send(this.encode(msg));
+            return;
         }
         res.status(404).send('404');
     }
