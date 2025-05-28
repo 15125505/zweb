@@ -35,6 +35,7 @@ export abstract class Process {
      * 用于处理我们自定义的协议请求
      */
     async onReq(url: string, data: any): net.AsyncMsg<any> {
+        await this.waitForInit();
         return this.msgFunc.get(url)?.bind(this)(data);
     }
 
@@ -44,6 +45,12 @@ export abstract class Process {
     onHttpReq(url: string, req: express.Request, res: express.Response) {
         this.commonFunc.get(url)?.bind(this)(req, res);
     }
+
+    /**
+     * 等待初始化完成
+     * 如果用户在接口调用之前确定某些初始化已经完成，可以重载这个函数以便进行相应的等待
+     */
+    async waitForInit(): Promise<void> {};
 
     abstract init(): void;
 }

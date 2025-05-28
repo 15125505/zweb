@@ -4,6 +4,7 @@ import express from 'express';
 import Log from "crlog";
 import {Process} from "./process";
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload';
 
 class HttpServer {
 
@@ -46,8 +47,22 @@ class HttpServer {
         app.disable('x-powered-by');
         app.disable('etag');
 
-        // 这句代码保证所有请求的body都被解析为二进制数据
-        app.use(bodyParser.raw({type: '*/*'}));
+        // 对非文件上传的请求使用 bodyParser.raw
+        app.use((req, res, next) => {
+            if (req.path !== '/uploadFile') {
+                bodyParser.raw({ type: '*/*' })(req, res, next);
+            } else {
+                next();
+            }
+        });
+
+        // 配置 express-fileupload 中间件
+        app.use(fileUpload({
+            createParentPath: true, // 自动创建上传目录
+            limits: {
+                fileSize: 50 * 1024 * 1024 // 限制文件大小为 50MB
+            }
+        }));
 
         // 显示请求的时间等信息
         app.use((req, res, next) => {
@@ -67,6 +82,11 @@ class HttpServer {
 
         // 处理请求
         app.use((req, res, next) => {
+            // 如果请求是OPTIONS，直接返回
+            if (req.method === 'OPTIONS') {
+                res.send('ok');
+                return;
+            }
             this.process(req, res).catch(e => res.status(500).send(e?.message ?? e));
         });
 
@@ -87,10 +107,16 @@ class HttpServer {
             if (!p.hasMsgFunc(url)) {
                 continue;
             }
-            const data = this.decode(req.body);
-            Log.info('收到：', data);
-            const msg = await p.onReq(req.url, data);
-            Log.info('返回：', msg);
+            let msg: net.Msg<any> = {code: 0};
+            try {
+                const data = this.decode(req.body);
+                Log.info('收到：', data);
+                msg = await p.onReq(req.url, data);
+            } catch (e) {
+                Log.error(`处理请求<${req.url}>失败`, e);
+                msg.code = 5000;
+                msg.err = JSON.stringify(e?.message ?? e);
+            }
             res.send(this.encode(msg));
             return;
         }

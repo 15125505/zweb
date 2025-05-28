@@ -1,8 +1,10 @@
 // Description: 本文是一个例子，用于演示如何使用本框架
 // 使用方法： 复制一下本文件，然后按照要求修改
 
+import { gMongoDb } from "../conf/mongoConfig";
+import { gMysql } from "../conf/mysqlConfig";
 import {Process} from "../core/process";
-import {gDb} from "../conf/dbConfig";
+
 import express from "express";
 
 
@@ -26,11 +28,21 @@ export class Example extends Process {
     async onLogin(param: netParam.Login): net.AsyncMsg<netRet.Login> {
 
         // todo: 此处顺便演示一下如何查询数据库
-        const [rows] = await gDb.pool.query(`select token from token where code = ?`, [param.code]);     // 如果sql语句异常，会抛出异常
-        const token = (rows as { token: string }[])[0]?.token; // 如果没有查询到结果，rows是一个空数组
+        const [rows] = await gMysql.pool.query(`select username as token from user where code = ?`, [param.code]);     // 如果sql语句异常，会抛出异常
+        let token = (rows as { token: string }[])[0]?.token; // 如果没有查询到结果，rows是一个空数组
         if (!token) {
             return {code: 1, err: '登录码错误'};
         }
+        console.log("mysql：", token);
+
+        // todo: 此处顺便演示一下如何查询Mongo数据库
+        const user = await gMongoDb.mongo.db('my_db').collection<db.User>('user').findOne({code: param.code});
+        if (!user) {
+            return {code: 1, err: '登录码错误'};
+        }
+        token = user.username;
+        console.log("mongo：", token);
+
         return {code: 0, msg: {token}};
     }
 }

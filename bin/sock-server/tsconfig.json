@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "module": "CommonJS",
-    "target": "ES6",
+    "target": "ES2018",
     "allowJs": true,
     "esModuleInterop": true,
     "noEmit": false
