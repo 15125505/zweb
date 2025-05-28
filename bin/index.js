@@ -92,6 +92,7 @@ function zSockServer(srcFolder, dstFolder, name) {
 function zNodeServer(srcFolder, dstFolder, name) {
     const files = [
         '/ecosystem.config.js',
+        '/.prettierrc.json',
         '/package.json',
         '/README.md',
         '/tsconfig.json',
@@ -99,8 +100,11 @@ function zNodeServer(srcFolder, dstFolder, name) {
         '/upload.ts',
         '/src/index.ts',
         '/src/@types/net.d.ts',
+        '/src/@types/db.d.ts',
         '/src/app/example.ts',
-        '/src/conf/dbConfig.ts',
+        '/src/conf/config.ts',
+        '/src/conf/mysqlConfig.ts',
+        '/src/conf/mongoConfig.ts',
         '/src/core/httpServer.ts',
         '/src/core/process.ts',
     ];
